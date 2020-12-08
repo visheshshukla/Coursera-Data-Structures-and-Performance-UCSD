@@ -5,6 +5,7 @@ package document;
  * @author UC San Diego Intermediate Programming MOOC team
  */
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +43,14 @@ public abstract class Document {
 		return tokens;
 	}
 	
+	private HashMap<Character, String> createHashMap(char[] charArr){
+		HashMap<Character, String> hm = new HashMap<Character,String>();
+		for(char c: charArr){
+			hm.put(c,"");
+		}
+		return hm;
+	}
+	
 	/** This is a helper function that returns the number of syllables
 	 * in a word.  You should write this and use it in your 
 	 * BasicDocument class.
@@ -67,7 +76,35 @@ public abstract class Document {
 		// TODO: Implement this method so that you can call it from the 
 	    // getNumSyllables method in BasicDocument (module 2) and 
 	    // EfficientDocument (module 3).
-	    return 0;
+		word=word.toLowerCase();
+		char[] vowels = {'e','y','u','i','o','a'};
+
+		HashMap<Character,String> hm =createHashMap(vowels);
+
+		int count=0;
+		boolean loneE=false;
+		boolean continuous=false;
+		int maxInd= word.length()-1;
+
+		for(int i=maxInd;i>=0;i--){
+
+			if(i == maxInd && word.charAt(maxInd) == 'e' && !hm.containsKey(word.charAt(maxInd-1))){
+				loneE=true;
+			}
+
+			if(hm.containsKey(word.charAt(i)) && !continuous){
+				count++;
+				continuous = true;
+			} else if(!hm.containsKey(word.charAt(i))) {
+				continuous =false;
+			}	
+		}
+
+		if(loneE && count>1){
+			count=count-1;
+		}
+
+		return count;
 	}
 	
 	/** A method for testing
@@ -132,7 +169,8 @@ public abstract class Document {
 	{
 	    // TODO: You will play with this method in week 1, and 
 		// then implement it in week 2
-	    return 0.0;
+		int numWords = getNumWords();
+        return 206.835-1.015*(Math.round(((double)numWords/(double)getNumSentences()*100d))/100d)-84.6*(Math.round(((double)getNumSyllables()/(double)numWords)*100d)/100d);
 	}
 	
 	
