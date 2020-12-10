@@ -115,6 +115,23 @@ public class MyLinkedListTester {
 		assertEquals("Remove: check size is correct ", 2, list1.size());
 		
 		// TODO: Add more tests here
+		
+		int b = list1.remove(1);
+        assertEquals("Remove: check a is correct ", 42, b);
+        assertEquals("Remove: check element 0 is correct ", (Integer)21, list1.get(0));
+        assertEquals("Remove: check size is correct ", 1, list1.size());
+
+        try {
+            list1.remove(-1);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
+        try {
+            list1.remove(list1.size);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
+
 	}
 	
 	/** Test adding an element into the end of the list, specifically
@@ -125,6 +142,14 @@ public class MyLinkedListTester {
 	{
         // TODO: implement this test
 		
+		list1.add(31);
+        assertEquals("Remove: check element 0 is correct ", (Integer)31, list1.get(list1.size-1));
+        list1.remove(3);
+        assertEquals("Remove: check element 0 is correct ", (Integer)42, list1.get(list1.size-1));
+        list1.add(22);
+        list1.add(33);
+        assertEquals("Remove: check element 0 is correct ", (Integer)33, list1.get(list1.size-1));
+		
 	}
 
 	
@@ -133,6 +158,19 @@ public class MyLinkedListTester {
 	public void testSize()
 	{
 		// TODO: implement this test
+		
+		assertEquals("Remove: check element 0 is correct ", (Integer)3, (Integer)list1.size());
+        list1.add(22);
+        list1.add(23);
+        assertEquals("Remove: check element 0 is correct ", (Integer)5, (Integer)list1.size());
+        list1.remove(0);
+        list1.remove(0);
+        list1.remove(0);
+        list1.remove(0);
+        assertEquals("Remove: check element 0 is correct ", (Integer)1, (Integer)list1.size());
+        list1.remove(0);
+        assertEquals("Remove: check element 0 is correct ", (Integer)0, (Integer)list1.size());
+		
 	}
 
 	
@@ -146,6 +184,28 @@ public class MyLinkedListTester {
 	{
         // TODO: implement this test
 		
+		list1.add(0, 31);
+        assertEquals("Add: check element 0 is correct ", (Integer)31, list1.get(0));
+        list1.add(2, 66);
+        list1.remove(0);
+        assertEquals("Add: check element 0 is correct ", (Integer)66, list1.get(1));
+
+        try {
+            list1.add(1, null);
+            fail("null cannot be added into the list");
+        }
+        catch (NullPointerException e) { }
+        try {
+            list1.add(5, 66);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
+        try {
+            list1.add(-1, 66);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
+		
 	}
 	
 	/** Test setting an element in the list */
@@ -153,9 +213,23 @@ public class MyLinkedListTester {
 	public void testSet()
 	{
 	    // TODO: implement this test
+		
+		int a = list1.set(0, 72);
+        assertEquals("Add: check element 0 is correct ", (Integer)72, list1.get(0));
+        assertEquals("Remove: check a is correct ", 65, a);
+
+        try {
+            list1.set(-1, 66);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
+        try {
+            list1.set(5, 66);
+            fail("Check out of bounds");
+        }
+        catch (IndexOutOfBoundsException e) { }
 	    
 	}
-	
 	
 	// TODO: Optionally add more test methods.
 	
