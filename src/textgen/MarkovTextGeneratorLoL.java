@@ -20,6 +20,9 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 	// The random number generator
 	private Random rnGenerator;
 	
+	//First word in the training set
+	private String firstWord;
+	
 	public MarkovTextGeneratorLoL(Random generator)
 	{
 		wordList = new LinkedList<ListNode>();
@@ -27,12 +30,78 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 		rnGenerator = generator;
 	}
 	
+	private String getFirstWord (){
+		return firstWord;
+	}
+	
+	private void setFirstWord(String word){
+		firstWord = word;
+	}
 	
 	/** Train the generator by adding the sourceText */
 	@Override
 	public void train(String sourceText)
 	{
 		// TODO: Implement this method
+		
+		//Per assignment specifications, this method does not remove the original word lists.
+		//clearOldTrainingSet();
+		if(sourceText == null|| sourceText =="")return;
+
+		sourceText=sourceText.trim();
+
+		//If the given string was only comprised of spaces, exit the method
+		if(sourceText.isEmpty()){
+			return;
+		}
+
+		String[] textArr= sourceText.split("\\s+");
+		int starterWsLength = textArr.length;
+
+		//Add the first word to an empty list
+		String starterW = textArr[0];
+		setFirstWord(starterW);
+
+		ListNode newWord = new ListNode(starterW);
+
+		//If there was only 1 word entered as a parameter, add that word to the word list
+		//and exit the method.
+		if(starterWsLength == 1){
+			wordList.add(newWord);
+			return;
+		}
+
+		String nextW = textArr[1];
+		newWord.addNextWord(nextW);
+		wordList.add(newWord);
+
+		for(int i=1; i<starterWsLength-1; i++){
+			starterW = nextW;
+			nextW = textArr[i+1];
+			boolean isNotInTheList = true;
+
+			for(ListNode node: wordList){
+				if(node.getWord().equals(starterW)){
+					node.addNextWord(nextW);
+					isNotInTheList = false;
+				}
+			}
+
+			if(isNotInTheList){
+				newWord = new ListNode(starterW);
+				newWord.addNextWord(nextW);
+				wordList.add(newWord);
+			}
+		}
+
+		//For the last word in the text, make the starterW its next word
+		newWord = new ListNode(textArr[starterWsLength-1]);
+		newWord.addNextWord(getFirstWord());
+		wordList.add(newWord);
+	}
+	
+	private void clearOldTrainingSet(){
+		wordList = new LinkedList<ListNode>();
 	}
 	
 	/** 
@@ -41,7 +110,39 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 	@Override
 	public String generateText(int numWords) {
 	    // TODO: Implement this method
-		return null;
+		
+		if (numWords< 0) throw new IndexOutOfBoundsException();
+		if (numWords ==0) return "";
+
+		//If the model has not been trained on any data, return an empty string
+		if(wordList.size() == 0){
+			return "";
+		}
+
+		//If the model has only been trained on 1 word, return that word
+		boolean oneLetterTrainingSet = wordList.size()==1 && wordList.get(0).getAllNextWords().size()==0;
+		if(oneLetterTrainingSet){
+			return wordList.get(0).getWord();
+		}
+
+	    StringBuilder sb = new StringBuilder();
+
+	    String currentWord = getFirstWord();
+	    sb.append(currentWord);
+	    int i=1;
+	    while(i<numWords){
+	    	//Find the currentWord node
+	    	for(ListNode node: wordList){
+	    		if(node.getWord().equals(currentWord)){
+	    			currentWord = node.getRandomNextWord(rnGenerator);
+	    			sb.append(" "+currentWord);
+	    			break;
+	    		}
+	    	}
+	    	i++;
+	    }
+	    return sb.toString();
+		
 	}
 	
 	
@@ -62,6 +163,10 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 	public void retrain(String sourceText)
 	{
 		// TODO: Implement this method.
+		
+		clearOldTrainingSet();
+		train(sourceText);
+		
 	}
 	
 	// TODO: Add any private helper methods you need here.
@@ -78,6 +183,16 @@ public class MarkovTextGeneratorLoL implements MarkovTextGenerator {
 		MarkovTextGeneratorLoL gen = new MarkovTextGeneratorLoL(new Random(42));
 		String textString = "Hello.  Hello there.  This is a test.  Hello there.  Hello Bob.  Test again.";
 		System.out.println(textString);
+		
+		gen.train("");
+		System.out.println(gen.generateText(20));
+
+		gen.train("           a           ");
+		System.out.println(gen.generateText(20));
+
+		gen.train("                   ");
+		System.out.println(gen.generateText(20));
+		
 		gen.train(textString);
 		System.out.println(gen);
 		System.out.println(gen.generateText(20));
@@ -139,12 +254,24 @@ class ListNode
 		nextWords.add(nextWord);
 	}
 	
+	public List<String> getAllNextWords(){
+		return nextWords;
+	}
+	
 	public String getRandomNextWord(Random generator)
 	{
 		// TODO: Implement this method
 	    // The random number generator should be passed from 
 	    // the MarkovTextGeneratorLoL class
-	    return null;
+	    
+		int val=0;
+		int bound = this.getAllNextWords().size();
+
+		if(bound >1 ){
+			val = generator.nextInt(bound);
+		}
+		return this.getAllNextWords().get(val);
+		
 	}
 
 	public String toString()
