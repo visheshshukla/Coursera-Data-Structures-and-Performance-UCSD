@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 /** 
  * An trie data structure that implements the Dictionary and the AutoComplete ADT
@@ -40,6 +41,24 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	public boolean addWord(String word)
 	{
 	    //TODO: Implement this method.
+		
+		if(isWord(word)){ return false; }
+        TrieNode trie = root;
+        char[] chars = word.toLowerCase().toCharArray();
+
+        int counter = 0;
+        while(counter < chars.length){
+            Character ch = chars[counter];
+            Set children = trie.getValidNextCharacters();
+            if(!children.contains(ch)){
+                trie.insert(ch);
+                if(counter == chars.length-1){trie.getChild(ch).setEndsWord(true); size++; return true;}
+            }trie = trie.getChild(ch);
+            if(trie.getText().equals(word) && !isWord(trie.toString())){trie.setEndsWord(true); size++; return true;}
+
+            counter++;
+        }
+		
 	    return false;
 	}
 	
@@ -50,7 +69,9 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	public int size()
 	{
 	    //TODO: Implement this method
-	    return 0;
+	    
+		return size;
+		
 	}
 	
 	
@@ -60,7 +81,14 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
 	public boolean isWord(String s) 
 	{
 	    // TODO: Implement this method
-		return false;
+		
+		TrieNode trie = findNode(s);
+        if(trie==null)
+        { 
+        	return false; 
+        }
+	    return findNode(s).endsWord();
+		
 	}
 
 	/** 
@@ -101,9 +129,43 @@ public class AutoCompleteDictionaryTrie implements  Dictionary, AutoComplete {
     	 //       Add all of its child nodes to the back of the queue
     	 // Return the list of completions
     	 
-         return null;
-     }
+    	 if(numCompletions==0)
+    	 { 
+    		 return new ArrayList(); 
+    	 }
 
+         TrieNode currNode = findNode(prefix);
+         if(currNode==null)
+         { 
+        	 return new ArrayList(); 
+         }
+
+         List completions = new ArrayList();
+         LinkedList<TrieNode> queue = new LinkedList <>();
+         queue.addLast(currNode);
+
+         while(!queue.isEmpty() && completions.size()!=numCompletions){
+             TrieNode removed = queue.removeFirst();
+             if(removed.endsWord()){
+                 completions.add(removed.getText());
+             }for(Character c: removed.getValidNextCharacters()){
+                 queue.addLast(removed.getChild(c));
+             }
+         }
+         return completions; 
+    	 
+     }
+     
+     private TrieNode findNode(String s){
+         if(s.isEmpty()){return root;}
+
+         TrieNode currNode = root;
+         for(Character c: s.toLowerCase().toCharArray()){
+             currNode = currNode.getChild(c);
+             if(currNode==null){ return null; }
+         }return currNode;
+     }
+     
  	// For debugging
  	public void printTree()
  	{
